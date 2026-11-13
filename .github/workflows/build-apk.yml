@@ -1,0 +1,36 @@
+name: Build TikTok Bridge
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '*.zip'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+
+      - name: Extract project
+        run: |
+          unzip -q TikTokBridge_SourceOnly.zip -d extracted
+
+      - name: Build APK
+        working-directory: extracted/TikTokBridge
+        run: gradle assembleDebug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TikTokBridge-APK
+          path: extracted/TikTokBridge/app/build/outputs/apk/debug/app-debug.apk
